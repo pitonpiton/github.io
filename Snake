@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Snake</title>
+  <link rel="stylesheet" href="snake.css">
+  <style>
+    canvas {
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+  <script>
+    
+const canvas = document.getElementById("game");//Присваеваем переменной все содержимое тэга канвас с id game
+const ctx = canvas.getContext("2d");//Присваеваем нашей переменной значение, что эта игра будет двухмерной
+
+const ground = new Image();//Создали объект игровое поле в виде картинки, скачаной с ресурса в Ютуб-видео
+ground.src = "img/ground.png";//Вызвал картинку игрового поля в canvas
+
+const foodImg = new Image();//Создал объект Картинка с едой для змейки, скачаной с ресурса в Ютуб-видео
+foodImg.src = "img/food.png";//Вызвал картинку еды
+
+let box = 32;// переменная отвечает за ширину или высоту игрового поля в 32 квадратика
+
+let score = 0;// переменная очков в игровое
+
+let food = {
+	x: Math.floor((Math.random() * 17 + 1)) * box,
+	y: Math.floor((Math.random() * 15 + 3)) * box,
+};// Переменная, созданная как объект, который случайным образом отображает еду по осях х (17 квадратиков) и у (15 квадратиков). На box  умножаем, потому, что нам нужно это все еще получить у пикселях
+
+let snake = [];//Объект Змейка в виде массива
+snake[0] = {
+	x: 9 * box,
+	y: 10 * box
+};//Координаты первого элемента объекта Змейка
+
+document.addEventListener("keydown", direction);//Обработчик событий, когда нажимаем на html-странице на кнопки управления
+//вправо влево и т.д.
+
+let dir;
+
+function direction(event) {
+	if(event.keyCode == 37 && dir != "right")
+		dir = "left";
+	else if(event.keyCode == 38 && dir != "down")
+		dir = "up";
+	else if(event.keyCode == 39 && dir != "left")
+		dir = "right";
+	else if(event.keyCode == 40 && dir != "up")
+		dir = "down";
+}//Функция, описывающая поведения змейки при нажатии на кнопки управления
+
+function eatTail(head, arr) {
+	for(let i = 0; i < arr.length; i++) {
+		if(head.x == arr[i].x && head.y == arr[i].y)
+			clearInterval(game);//Очищает интервал, то есть прекращает игру, так как она проиграна
+	}//Функция, говорящая что если голова змеи дотронулась до любого элемента себя самой, то игра проиграна
+}
+
+function drawGame() {
+	ctx.drawImage(ground, 0, 0);// Рисует необходимую картинку (в даном случае ground) по указанным координатам по  x and y
+
+	ctx.drawImage(foodImg, food.x, food.y);//Рисует еду с соответствующими координатами
+
+	for(let i = 0; i < snake.length; i++) {
+		ctx.fillStyle = i == 0 ? "green" : "red";//Рисует цвет змейки, которая будет в виде квадратиков
+		ctx.fillRect(snake[i].x, snake[i].y, box, box);//Рисует форму змейки в виде квадратиков
+	}//Рисует массив snake
+
+	ctx.fillStyle = "white";//Цвет текста над квадратным полем
+	ctx.font = "50px Arial";//Стиль текста
+	ctx.fillText(score, box * 2.5, box * 1.7);//Сам текст, который состоит только из переменной score, обозначающей наши очки
+    //и ее координат в квадратиках
+
+	let snakeX = snake[0].x; //
+	let snakeY = snake[0].y;//Первоначальные координаты первого элемента рисуем нашей змейки
+
+	if(snakeX == food.x && snakeY == food.y)//Если змейка наползла на еду
+	 {
+		score++;//очки увеличились
+		food = {
+			x: Math.floor((Math.random() * 17 + 1)) * box,
+			y: Math.floor((Math.random() * 15 + 3)) * box,// Значение +3 для того, что форма игрового поля такова, что по оси у мы имеем 
+			//меньшее число пикселей, нежели по х ровно на 2 квадратика пикселей. По этому, чтоб морковку иногда не бросило за границу 
+			//квадратного поля, надо добавить минимум 3
+		};//Еда новая поменяла координаты на поле
+	} else
+		{snake.pop()};//Удаляем последний элемент змассива
+
+	if(snakeX < box || snakeX > box * 17
+		|| snakeY < 3 * box || snakeY > box * 17)
+		{clearInterval(game);//Условие, которое позволяет не выходить змейке за поля квадратного поля и закончить игру 
+		//проигрышем, если мы дотронулись головой змеи до любого края поля
+		ctx.fillText(score + '   Game over!', box * 2.5, box * 1.7)};
+
+	if(dir == "left") snakeX -= box;
+	if(dir == "right") snakeX += box;
+	if(dir == "up") snakeY -= box;
+	if(dir == "down") snakeY += box;//Все четыре варианта описывают следующий шаг змейки, при нажатии кнопок управления в 
+	//в соответствующие стороны
+
+	let newHead = {
+		x: snakeX,
+		y: snakeY
+	};//Создает новый элемент головы змейки с координатами по х и у оперативными на даный момент
+
+	eatTail(newHead, snake);//Вызываем функцию касания змейки самой себя с соответствующими параметрами
+
+	snake.unshift(newHead);//Добавляет элемент newHead к массиву Змейка
+}// функция рисует нашу игру на основе констант  food and ground
+
+let game = setInterval(drawGame, 100);//Вызываем нашу функцию drawGame каждые 100 мс
+
+
+  </script>
+</head>
+
+<body>
+  <canvas id="game" width="608px" height="608px"></canvas>
+  
+</body>
+</html>
