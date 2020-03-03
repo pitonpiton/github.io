@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<p>Click the button to perfom a global search for the letters "ain" in a string, and display the matches.</p>
+
+<button onclick="dial(str)">Try it</button>
+
+<p id="demo"></p>
+
+<script>
+function dial(str) {
+	str = str.toLowerCase();
+	let o = {
+		abc  : 2,
+		def  : 3,
+		ghi  : 4,
+		jkl  : 5,
+		mno  : 6,
+		pqrs : 7,
+		tuv  : 8,
+		wxyz : 9
+	};
+	var res = [...str].map(x => /[a-z]/.test(x) ? 
+			o[Object.keys(o).filter(z => z.includes(x))] : x).join('');
+    document.getElementById("demo").innerHTML = res;
+    alert('Look at this!'); 
+}
+
+dial('1aaavgfdklmn');
+
+</script>
+
+
+</body>
+</html>
